@@ -1,0 +1,125 @@
+
+package fr.pulse;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Arrays;
+
+public final class PulsePlugin extends JavaPlugin implements Listener {
+
+    private static final String MENU_TITLE = ChatColor.BLUE + "✦ PULSE";
+
+    @Override
+    public void onEnable() {
+        getServer().getPluginManager().registerEvents(this, this);
+        getLogger().info("PULSE est activé !");
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().info("PULSE est désactivé !");
+    }
+
+    @Override
+    public boolean onCommand(
+            CommandSender sender,
+            Command command,
+            String label,
+            String[] args
+    ) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Cette commande est réservée aux joueurs.");
+            return true;
+        }
+
+        if (command.getName().equalsIgnoreCase("pulse")) {
+            openMainMenu(player);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void openMainMenu(Player player) {
+        Inventory menu = Bukkit.createInventory(null, 27, MENU_TITLE);
+
+        menu.setItem(10, createItem(
+                Material.RED_BED,
+                "§bMes maisons",
+                "§7Gérer tes points de maison"
+        ));
+
+        menu.setItem(12, createItem(
+                Material.ENDER_PEARL,
+                "§bTéléportation",
+                "§7Envoyer une demande à un joueur"
+        ));
+
+        menu.setItem(14, createItem(
+                Material.SHIELD,
+                "§bFactions",
+                "§7Créer et gérer ta faction"
+        ));
+
+        menu.setItem(16, createItem(
+                Material.GOLD_INGOT,
+                "§bÉconomie",
+                "§7Consulter ton solde"
+        ));
+
+        menu.setItem(22, createItem(
+                Material.BARRIER,
+                "§cFermer",
+                "§7Fermer ce menu"
+        ));
+
+        player.openInventory(menu);
+    }
+
+    private ItemStack createItem(
+            Material material,
+            String name,
+            String description
+    ) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            meta.setDisplayName(name);
+            meta.setLore(Arrays.asList(description));
+            item.setItemMeta(meta);
+        }
+
+        return item;
+    }
+
+    @EventHandler
+    public void onMenuClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!MENU_TITLE.equals(event.getView().getTitle())) return;
+
+        event.setCancelled(true);
+
+        if (event.getCurrentItem() == null) return;
+
+        switch (event.getRawSlot()) {
+            case 10 -> player.sendMessage("§bPULSE §7: Menu des maisons bientôt disponible.");
+            case 12 -> player.sendMessage("§bPULSE §7: Téléportation bientôt disponible.");
+            case 14 -> player.sendMessage("§bPULSE §7: Factions bientôt disponibles.");
+            case 16 -> player.sendMessage("§bPULSE §7: Économie bientôt disponible.");
+            case 22 -> player.closeInventory();
+        }
+    }
+}
